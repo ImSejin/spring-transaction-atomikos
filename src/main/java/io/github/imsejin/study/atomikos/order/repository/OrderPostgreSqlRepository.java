@@ -1,6 +1,6 @@
 package io.github.imsejin.study.atomikos.order.repository;
 
-import io.github.imsejin.study.atomikos.configuration.database.PostgreSqlDataSourceConfiguration.PostgreSqlMapper;
+import io.github.imsejin.study.atomikos.configuration.database.PostgreSqlMapper;
 import io.github.imsejin.study.atomikos.order.model.GoodsOrder;
 import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Select;

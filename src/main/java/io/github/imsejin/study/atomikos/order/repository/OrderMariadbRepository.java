@@ -1,8 +1,9 @@
 package io.github.imsejin.study.atomikos.order.repository;
 
-import io.github.imsejin.study.atomikos.configuration.database.MariadbDataSourceConfiguration.MariadbMapper;
+import io.github.imsejin.study.atomikos.configuration.database.MariadbMapper;
 import io.github.imsejin.study.atomikos.order.model.GoodsOrder;
 import org.apache.ibatis.annotations.Insert;
+import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Select;
 import org.springframework.stereotype.Repository;
 
