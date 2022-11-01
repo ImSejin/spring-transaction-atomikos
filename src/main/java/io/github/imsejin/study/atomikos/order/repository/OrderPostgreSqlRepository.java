@@ -15,13 +15,13 @@ public interface OrderPostgreSqlRepository {
     @Select("""
             SELECT ORDER_CD AS orderCode
                  , GOODS_NO AS goodsNumber
-              FROM GOODS_ORDER
+              FROM TMP_GOODS_ORDER
              WHERE 1 = 1
             """)
     List<GoodsOrder> findAllGoodsOrders();
 
     @Insert("""
-            INSERT INTO GOODS_ORDER (ORDER_CD, GOODS_NO)
+            INSERT INTO TMP_GOODS_ORDER (ORDER_CD, GOODS_NO)
             VALUES (#{orderCode}, #{goodsNumber})
             """)
     GoodsOrder saveGoodsOrder(GoodsOrder goodsOrder);

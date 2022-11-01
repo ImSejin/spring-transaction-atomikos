@@ -13,7 +13,7 @@ VALUES ('8000380205486', '로아커 웨하스 콰드라티니 피넛버터 125g'
 INSERT INTO GOODS (GOODS_NO, GOODS_NM)
 VALUES ('8801068407044', 'samlip 삼립호빵 크림치즈고구마 270g (90g x 3개입)');
 
-----------------------------------------------------------------------------------------------------
+-- -------------------------------------------------------------------------------------------------
 
 DROP TABLE IF EXISTS GOODS_ORDER CASCADE;
 CREATE TABLE GOODS_ORDER
@@ -22,7 +22,7 @@ CREATE TABLE GOODS_ORDER
     GOODS_NO VARCHAR(14) NOT NULL,
     CONSTRAINT PRIMARY KEY (ORDER_CD),
     CONSTRAINT GOODS_ORDER_GOODS_GOODS_NO_FK
-        FOREIGN KEY (GOODS_NO) REFERENCES GOODS
+        FOREIGN KEY (GOODS_NO) REFERENCES GOODS (GOODS_NO)
 );
 
 INSERT INTO GOODS_ORDER (ORDER_CD, GOODS_NO)

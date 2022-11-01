@@ -24,7 +24,7 @@ public class OrderService {
     public GoodsOrder saveGoodsOrder(GoodsOrder goodsOrder) {
         GoodsOrder order1 = postgreSqlRepository.saveGoodsOrder(goodsOrder);
         GoodsOrder order2 = mariadbRepository.saveGoodsOrder(goodsOrder);
-        return order1;
+        return order2;
     }
 
 }
