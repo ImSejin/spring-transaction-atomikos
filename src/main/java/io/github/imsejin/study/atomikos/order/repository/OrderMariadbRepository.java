@@ -1,9 +1,8 @@
 package io.github.imsejin.study.atomikos.order.repository;
 
-import io.github.imsejin.study.atomikos.configuration.database.MariadbMapper;
+import io.github.imsejin.study.atomikos.configuration.database.annotation.MariadbMapper;
 import io.github.imsejin.study.atomikos.order.model.GoodsOrder;
 import org.apache.ibatis.annotations.Insert;
-import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Select;
 import org.springframework.stereotype.Repository;
 
@@ -22,9 +21,9 @@ public interface OrderMariadbRepository {
     List<GoodsOrder> findAllGoodsOrders();
 
     @Insert("""
-            INSERT INTO GOODS_ORDER (ORDER_CD, GOODS_NO)
-            VALUES (#{orderCode}, #{goodsNumber})
+            INSERT INTO GOODS_ORDER (ORDER_CD, GOODS_NO, ORD_DT)
+            VALUES (#{orderCode}, #{goodsNumber}, #{orderDateTime})
             """)
-    GoodsOrder saveGoodsOrder(GoodsOrder goodsOrder);
+    int saveGoodsOrder(GoodsOrder goodsOrder);
 
 }

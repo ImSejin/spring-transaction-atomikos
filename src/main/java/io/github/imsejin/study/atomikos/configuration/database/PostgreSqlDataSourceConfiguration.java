@@ -1,6 +1,8 @@
 package io.github.imsejin.study.atomikos.configuration.database;
 
 import io.github.imsejin.study.atomikos.Application;
+import io.github.imsejin.study.atomikos.configuration.database.annotation.PostgreSqlMapper;
+import org.apache.ibatis.session.SqlSession;
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.mybatis.spring.SqlSessionFactoryBean;
 import org.mybatis.spring.SqlSessionTemplate;
@@ -10,7 +12,10 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.jdbc.DataSourceBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.jdbc.support.JdbcTransactionManager;
 import org.springframework.lang.Nullable;
+import org.springframework.transaction.TransactionManager;
+import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 import javax.sql.DataSource;
 
@@ -21,7 +26,9 @@ import javax.sql.DataSource;
         sqlSessionFactoryRef = "postgreSqlSessionFactory",
         sqlSessionTemplateRef = "postgreSqlSessionTemplate"
 )
-class PostgreSqlDataSourceConfiguration {
+public class PostgreSqlDataSourceConfiguration {
+
+    public static final String TRANSACTION_MANAGER_BEAN_NAME = "postgreSqlTransactionManager";
 
     @Bean("postgreSqlDataSource")
     @ConfigurationProperties("spring.datasource.mysql")
@@ -44,8 +51,14 @@ class PostgreSqlDataSourceConfiguration {
     }
 
     @Bean("postgreSqlSessionTemplate")
-    SqlSessionTemplate sqlSessionTemplate(@Nullable MybatisProperties mybatisProperties) throws Exception {
+    SqlSession sqlSessionTemplate(@Nullable MybatisProperties mybatisProperties) throws Exception {
         return new SqlSessionTemplate(sqlSessionFactory(mybatisProperties));
+    }
+
+    // TODO: What is the differences between JdbcTransactionManager and DataSourceTransactionManager?
+    @Bean(TRANSACTION_MANAGER_BEAN_NAME)
+    TransactionManager transactionManager() {
+        return new JdbcTransactionManager(dataSource());
     }
 
 }

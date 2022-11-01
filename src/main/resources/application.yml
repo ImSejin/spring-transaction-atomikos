@@ -6,6 +6,7 @@ server:
 spring:
   config:
     activate.on-profile: local
+
   datasource:
     mysql:
       driver-class-name: com.mysql.cj.jdbc.Driver
@@ -25,3 +26,26 @@ spring:
       username: root
       password: admin1!
       connection-test-query: SELECT 1
+
+  jta:
+    enabled: true
+    atomikos:
+      datasource:
+        mysql:
+          xa-data-source-class-name: com.mysql.cj.jdbc.MysqlXADataSource
+          xa-properties:
+            url: ${spring.datasource.mysql.jdbc-url}
+            user: ${spring.datasource.mysql.username}
+            password: ${spring.datasource.mysql.password}
+        postgresql:
+          xa-data-source-class-name: org.postgresql.xa.PGXADataSource
+          xa-properties:
+            url: ${spring.datasource.postgresql.jdbc-url}
+            user: ${spring.datasource.postgresql.username}
+            password: ${spring.datasource.postgresql.password}
+        mariadb:
+          xa-data-source-class-name: org.mariadb.jdbc.MariaDbDataSource
+          xa-properties:
+            url: ${spring.datasource.mariadb.jdbc-url}
+            user: ${spring.datasource.mariadb.username}
+            password: ${spring.datasource.mariadb.password}

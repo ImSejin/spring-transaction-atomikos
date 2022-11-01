@@ -23,7 +23,13 @@ class OrderController {
 
     @PostMapping
     Object saveOrder(@RequestBody GoodsOrder goodsOrder) {
-        return service.saveGoodsOrder(goodsOrder);
+        GoodsOrder order;
+
+//        order = service.saveGoodsOrder(goodsOrder);
+//        order = service.saveGoodsOrderToPostgreSql(goodsOrder);
+        order = service.saveGoodsOrderToMariadb(goodsOrder);
+
+        return order;
     }
 
 }

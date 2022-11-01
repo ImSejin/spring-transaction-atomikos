@@ -1,6 +1,6 @@
 package io.github.imsejin.study.atomikos.order.repository;
 
-import io.github.imsejin.study.atomikos.configuration.database.PostgreSqlMapper;
+import io.github.imsejin.study.atomikos.configuration.database.annotation.PostgreSqlMapper;
 import io.github.imsejin.study.atomikos.order.model.GoodsOrder;
 import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Select;
@@ -21,9 +21,9 @@ public interface OrderPostgreSqlRepository {
     List<GoodsOrder> findAllGoodsOrders();
 
     @Insert("""
-            INSERT INTO TMP_GOODS_ORDER (ORDER_CD, GOODS_NO)
-            VALUES (#{orderCode}, #{goodsNumber})
+            INSERT INTO TMP_GOODS_ORDER (ORDER_CD, GOODS_NO, ORD_DT)
+            VALUES (#{orderCode}, #{goodsNumber}, #{orderDateTime})
             """)
-    GoodsOrder saveGoodsOrder(GoodsOrder goodsOrder);
+    int saveGoodsOrder(GoodsOrder goodsOrder);
 
 }

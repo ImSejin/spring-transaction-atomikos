@@ -1,4 +1,4 @@
-package io.github.imsejin.study.atomikos.configuration.database;
+package io.github.imsejin.study.atomikos.configuration.database.annotation;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
