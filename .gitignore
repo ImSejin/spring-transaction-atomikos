@@ -4,6 +4,8 @@ transaction-logs/
 !gradle/wrapper/gradle-wrapper.jar
 !**/src/main/**/build/
 !**/src/test/**/build/
+*.lck
+*.log
 
 ### STS ###
 .apt_generated
