@@ -1,3 +1,5 @@
+import java.nio.charset.StandardCharsets
+
 plugins {
     id 'org.springframework.boot' version '2.7.5'
     id 'io.spring.dependency-management' version '1.0.15.RELEASE'
@@ -8,6 +10,13 @@ group = 'io.github.imsejin.study'
 version = '0.1.0'
 sourceCompatibility = JavaVersion.VERSION_17
 targetCompatibility = JavaVersion.VERSION_17
+
+tasks.withType(JavaCompile) {
+    options.encoding = StandardCharsets.UTF_8
+}
+tasks.withType(Javadoc) {
+    options.encoding = StandardCharsets.UTF_8
+}
 
 configurations {
     compileOnly {
