@@ -17,16 +17,14 @@ public class OrderService {
     private final OrderMariadbRepository mariadbRepository;
 
     public List<GoodsOrder> getGoodsOrders() {
-//        return mariadbRepository.findAllGoodsOrders();
-        return null;
+        return mariadbRepository.findAllGoodsOrders();
     }
 
     @Transactional
     public GoodsOrder saveGoodsOrder(GoodsOrder goodsOrder) {
-//        GoodsOrder order1 = postgreSqlRepository.saveGoodsOrder(goodsOrder);
-//        GoodsOrder order2 = mariadbRepository.saveGoodsOrder(goodsOrder);
-//        return order1;
-        return null;
+        GoodsOrder order1 = postgreSqlRepository.saveGoodsOrder(goodsOrder);
+        GoodsOrder order2 = mariadbRepository.saveGoodsOrder(goodsOrder);
+        return order1;
     }
 
 }
