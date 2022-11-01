@@ -1,22 +1,27 @@
-spring:
-  config:
-    activate:
-      on-profile: local
-  datasource:
-    postgresql:
-      hikari:
-        data-source-class-name: org.postgresql.Driver
-        jdbc-url: jdbc:postgresql://localhost:5432/postgres
-        username: postgres
-        password: admin1!
-        connection-test-query: SELECT 1
-      mariadb:
-        hikari:
-          data-source-class-name: org.mariadb.jdbc.Driver
-          jdbc-url: jdbc:mariadb://localhost:3306/study_db
-          username: root
-          password: admin1!
-          connection-test-query: SELECT 1
-
 server:
   port: 8080
+
+---
+
+spring:
+  config:
+    activate.on-profile: local
+  datasource:
+    mysql:
+      driver-class-name: com.mysql.cj.jdbc.Driver
+      jdbc-url: jdbc:mysql://oneplat.asuscomm.com:3306/pkqss_mgmt_db?serverTimezone=Asia/Seoul
+      username: admin
+      password: dbfrhrfh1rk!
+      connection-test-query: SELECT 1
+    postgresql:
+      driver-class-name: org.postgresql.Driver
+      jdbc-url: jdbc:postgresql://localhost:5432/postgres
+      username: postgres
+      password: admin1!
+      connection-test-query: SELECT 1
+    mariadb:
+      driver-class-name: org.mariadb.jdbc.Driver
+      jdbc-url: jdbc:mariadb://localhost:3306/test_db
+      username: root
+      password: admin1!
+      connection-test-query: SELECT 1

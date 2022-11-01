@@ -5,10 +5,12 @@ import org.apache.ibatis.session.SqlSessionFactory;
 import org.mybatis.spring.SqlSessionFactoryBean;
 import org.mybatis.spring.SqlSessionTemplate;
 import org.mybatis.spring.annotation.MapperScan;
+import org.mybatis.spring.boot.autoconfigure.MybatisProperties;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.jdbc.DataSourceBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.lang.Nullable;
 
 import javax.sql.DataSource;
 
@@ -22,21 +24,28 @@ import javax.sql.DataSource;
 class PostgreSqlDataSourceConfiguration {
 
     @Bean("postgreSqlDataSource")
-    @ConfigurationProperties("spring.datasource.postgresql.hikari")
-    static DataSource dataSource() {
+    @ConfigurationProperties("spring.datasource.mysql")
+//    @ConfigurationProperties("spring.datasource.postgresql")
+    DataSource dataSource() {
         return DataSourceBuilder.create().build();
     }
 
     @Bean("postgreSqlSessionFactory")
-    static SqlSessionFactory sqlSessionFactory() throws Exception {
+    SqlSessionFactory sqlSessionFactory(@Nullable MybatisProperties mybatisProperties) throws Exception {
         SqlSessionFactoryBean factoryBean = new SqlSessionFactoryBean();
+
         factoryBean.setDataSource(dataSource());
+        if (mybatisProperties != null) {
+            factoryBean.setConfiguration(mybatisProperties.getConfiguration());
+            factoryBean.setTypeHandlersPackage(mybatisProperties.getTypeHandlersPackage());
+        }
+
         return factoryBean.getObject();
     }
 
     @Bean("postgreSqlSessionTemplate")
-    static SqlSessionTemplate sqlSessionTemplate() throws Exception {
-        return new SqlSessionTemplate(sqlSessionFactory());
+    SqlSessionTemplate sqlSessionTemplate(@Nullable MybatisProperties mybatisProperties) throws Exception {
+        return new SqlSessionTemplate(sqlSessionFactory(mybatisProperties));
     }
 
 }
