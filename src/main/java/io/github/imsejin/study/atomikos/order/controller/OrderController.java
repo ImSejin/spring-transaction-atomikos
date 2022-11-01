@@ -25,9 +25,9 @@ class OrderController {
     Object saveOrder(@RequestBody GoodsOrder goodsOrder) {
         GoodsOrder order;
 
-//        order = service.saveGoodsOrder(goodsOrder);
+        order = service.saveGoodsOrder(goodsOrder);
 //        order = service.saveGoodsOrderToPostgreSql(goodsOrder);
-        order = service.saveGoodsOrderToMariadb(goodsOrder);
+//        order = service.saveGoodsOrderToMariadb(goodsOrder);
 
         return order;
     }

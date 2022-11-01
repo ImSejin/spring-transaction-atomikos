@@ -30,6 +30,8 @@ spring:
   jta:
     enabled: true
     atomikos:
+      properties:
+        log-base-name: tmlog
       datasource:
         mysql:
           xa-data-source-class-name: com.mysql.cj.jdbc.MysqlXADataSource
