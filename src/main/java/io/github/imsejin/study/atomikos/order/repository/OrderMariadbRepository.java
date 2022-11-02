@@ -15,6 +15,7 @@ public interface OrderMariadbRepository {
     @Select("""
             SELECT ORDER_CD AS orderCode
                  , GOODS_NO AS goodsNumber
+                 , ORD_DT   AS orderDateTime
               FROM GOODS_ORDER
              WHERE 1 = 1
             """)

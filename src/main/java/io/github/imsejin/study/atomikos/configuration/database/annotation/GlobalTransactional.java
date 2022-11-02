@@ -17,7 +17,7 @@ import java.lang.annotation.Target;
 @Documented
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.TYPE, ElementType.METHOD})
-@Transactional(transactionManager = XaDataSourceConfiguration.TRANSACTION_MANAGER_BEAN_NAME)
+@Transactional(transactionManager = XaDataSourceConfiguration.XA_TRANSACTION_MANAGER_BEAN_NAME)
 public @interface GlobalTransactional {
 
     /**

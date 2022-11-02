@@ -24,8 +24,6 @@ public class OrderService {
         return mariadbRepository.findAllGoodsOrders();
     }
 
-//    @PostgreSqlTransactional
-//    @MariadbTransactional
     @GlobalTransactional
     public GoodsOrder saveGoodsOrder(GoodsOrder goodsOrder) {
         // Defensive coding.

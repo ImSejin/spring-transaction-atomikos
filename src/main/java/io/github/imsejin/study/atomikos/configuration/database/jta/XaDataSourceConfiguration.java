@@ -1,47 +1,62 @@
 package io.github.imsejin.study.atomikos.configuration.database.jta;
 
-import com.atomikos.datasource.xa.jdbc.JdbcTransactionalResource;
-import com.atomikos.icatch.config.UserTransactionService;
-import com.atomikos.icatch.config.UserTransactionServiceImp;
 import com.atomikos.icatch.jta.UserTransactionImp;
 import com.atomikos.icatch.jta.UserTransactionManager;
 import io.github.imsejin.study.atomikos.Application;
-import io.github.imsejin.study.atomikos.configuration.database.MariadbDataSourceConfiguration;
-import io.github.imsejin.study.atomikos.configuration.database.PostgreSqlDataSourceConfiguration;
 import io.github.imsejin.study.atomikos.configuration.database.annotation.MariadbMapper;
 import io.github.imsejin.study.atomikos.configuration.database.annotation.PostgreSqlMapper;
-import org.apache.ibatis.session.SqlSession;
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.mybatis.spring.SqlSessionFactoryBean;
 import org.mybatis.spring.SqlSessionTemplate;
 import org.mybatis.spring.annotation.MapperScan;
 import org.mybatis.spring.boot.autoconfigure.MybatisProperties;
-import org.springframework.beans.factory.ObjectProvider;
-import org.springframework.boot.autoconfigure.transaction.TransactionManagerCustomizers;
-import org.springframework.boot.autoconfigure.transaction.jta.JtaProperties;
+import org.springframework.boot.autoconfigure.jdbc.XADataSourceAutoConfiguration;
+import org.springframework.boot.autoconfigure.transaction.TransactionAutoConfiguration;
+import org.springframework.boot.autoconfigure.transaction.jta.JtaAutoConfiguration;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.jta.atomikos.AtomikosDataSourceBean;
-import org.springframework.boot.jta.atomikos.AtomikosXADataSourceWrapper;
-import org.springframework.boot.system.ApplicationHome;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.DependsOn;
+import org.springframework.jdbc.support.JdbcTransactionManager;
 import org.springframework.lang.Nullable;
 import org.springframework.transaction.TransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.transaction.jta.JtaTransactionManager;
-import org.springframework.util.StringUtils;
 
 import javax.sql.DataSource;
 import javax.transaction.SystemException;
 import javax.transaction.UserTransaction;
-import java.io.File;
 
+/**
+ * @see JtaAutoConfiguration
+ * @see TransactionAutoConfiguration
+ * @see XADataSourceAutoConfiguration
+ */
 @Configuration
 @EnableTransactionManagement
 public class XaDataSourceConfiguration {
 
-    public static final String TRANSACTION_MANAGER_BEAN_NAME = "globalTransactionManager";
+    public static final String XA_TRANSACTION_MANAGER_BEAN_NAME = "globalTransactionManager";
+
+    @Bean(XA_TRANSACTION_MANAGER_BEAN_NAME)
+    @DependsOn({
+            MariaDB.TRANSACTION_MANAGER_BEAN_NAME,
+            PostgreSql.TRANSACTION_MANAGER_BEAN_NAME,
+            "postgresSqlXaSqlSessionFactory", "mariadbXaSqlSessionFactory",
+            "postgresSqlXaSqlSessionTemplate", "mariadbXaSqlSessionTemplate",
+    })
+    TransactionManager transactionManager() throws SystemException {
+        UserTransaction userTransaction = new UserTransactionImp();
+        userTransaction.setTransactionTimeout(3600);
+        UserTransactionManager atomikosTransactionManager = new UserTransactionManager();
+        atomikosTransactionManager.setForceShutdown(false);
+
+        JtaTransactionManager transactionManager = new JtaTransactionManager(userTransaction, atomikosTransactionManager);
+        transactionManager.setGlobalRollbackOnParticipationFailure(true);
+
+        return transactionManager;
+    }
 
     // -------------------------------------------------------------------------------------------------
 
@@ -49,17 +64,19 @@ public class XaDataSourceConfiguration {
     @MapperScan(
             basePackageClasses = Application.class,
             annotationClass = PostgreSqlMapper.class,
-            sqlSessionFactoryRef = "mysqlXaSqlSessionFactory",
-            sqlSessionTemplateRef = "mysqlXaSqlSessionTemplate"
+            sqlSessionFactoryRef = "postgresSqlXaSqlSessionFactory",
+            sqlSessionTemplateRef = "postgresSqlXaSqlSessionTemplate"
     )
-    static class PostgreSql {
-        @Bean("mysqlXaDataSource")
+    public static class PostgreSql {
+        public static final String TRANSACTION_MANAGER_BEAN_NAME = "postgreSqlTransactionManager";
+
+        @Bean("postgreSqlXaDataSource")
         @ConfigurationProperties("spring.jta.atomikos.datasource.mysql")
         DataSource dataSource() {
             return new AtomikosDataSourceBean();
         }
 
-        @Bean("mysqlXaSqlSessionFactory")
+        @Bean("postgresSqlXaSqlSessionFactory")
         SqlSessionFactory sqlSessionFactory(@Nullable MybatisProperties mybatisProperties) throws Exception {
             SqlSessionFactoryBean factoryBean = new SqlSessionFactoryBean();
 
@@ -72,9 +89,15 @@ public class XaDataSourceConfiguration {
             return factoryBean.getObject();
         }
 
-        @Bean("mysqlXaSqlSessionTemplate")
-        SqlSession sqlSessionTemplate(@Nullable MybatisProperties mybatisProperties) throws Exception {
+        @Bean("postgresSqlXaSqlSessionTemplate")
+        SqlSessionTemplate sqlSessionTemplate(@Nullable MybatisProperties mybatisProperties) throws Exception {
             return new SqlSessionTemplate(sqlSessionFactory(mybatisProperties));
+        }
+
+        // TODO: What is the differences between JdbcTransactionManager and DataSourceTransactionManager?
+        @Bean(TRANSACTION_MANAGER_BEAN_NAME)
+        TransactionManager transactionManager() {
+            return new JdbcTransactionManager(dataSource());
         }
     }
 
@@ -87,11 +110,12 @@ public class XaDataSourceConfiguration {
             sqlSessionFactoryRef = "mariadbXaSqlSessionFactory",
             sqlSessionTemplateRef = "mariadbXaSqlSessionTemplate"
     )
-    static class MariaDB {
+    public static class MariaDB {
+        public static final String TRANSACTION_MANAGER_BEAN_NAME = "mariadbTransactionManager";
+
         @Bean("mariadbXaDataSource")
         @ConfigurationProperties("spring.jta.atomikos.datasource.mariadb")
         DataSource dataSource() {
-            new AtomikosXADataSourceWrapper().wrapDataSource(null);
             return new AtomikosDataSourceBean();
         }
 
@@ -109,92 +133,15 @@ public class XaDataSourceConfiguration {
         }
 
         @Bean("mariadbXaSqlSessionTemplate")
-        SqlSession sqlSessionTemplate(@Nullable MybatisProperties mybatisProperties) throws Exception {
+        SqlSessionTemplate sqlSessionTemplate(@Nullable MybatisProperties mybatisProperties) throws Exception {
             return new SqlSessionTemplate(sqlSessionFactory(mybatisProperties));
         }
-    }
 
-    // -------------------------------------------------------------------------------------------------
-
-    @Bean(TRANSACTION_MANAGER_BEAN_NAME)
-    @DependsOn({
-            MariadbDataSourceConfiguration.TRANSACTION_MANAGER_BEAN_NAME,
-            PostgreSqlDataSourceConfiguration.TRANSACTION_MANAGER_BEAN_NAME,
-            "mysqlXaSqlSessionFactory", "mariadbXaSqlSessionFactory",
-            "mysqlXaSqlSessionTemplate", "mariadbXaSqlSessionTemplate",
-            "userTransaction", "atomikosTransactionManager",
-    })
-    TransactionManager transactionManager() throws SystemException {
-        UserTransaction userTransaction = userTransaction();
-        UserTransactionManager userTransactionManager = atomikosTransactionManager();
-
-        JtaTransactionManager transactionManager = new JtaTransactionManager(userTransaction, userTransactionManager);
-        transactionManager.setGlobalRollbackOnParticipationFailure(true);
-
-        return transactionManager;
-    }
-
-    @Bean("userTransaction")
-    UserTransaction userTransaction() throws SystemException {
-        UserTransaction userTransaction = new UserTransactionImp();
-        userTransaction.setTransactionTimeout(3600);
-
-        return userTransaction;
-    }
-
-    @Bean("atomikosTransactionManager")
-    UserTransactionManager atomikosTransactionManager() {
-        UserTransactionManager userTransactionManager = new UserTransactionManager();
-        userTransactionManager.setForceShutdown(false);
-        return userTransactionManager;
-    }
-
-    // -------------------------------------------------------------------------------------------------
-
-    @Bean(initMethod = "init", destroyMethod = "shutdownWait")
-//    @ConditionalOnMissingBean(UserTransactionService.class)
-    UserTransactionServiceImp userTransactionService(
-
-    ) {
-        new JdbcTransactionalResource()
-//            AtomikosProperties atomikosProperties, JtaProperties jtaProperties) {
-//        Properties properties = new Properties();
-//        if (StringUtils.hasText(jtaProperties.getTransactionManagerId())) {
-//            properties.setProperty("com.atomikos.icatch.tm_unique_name", jtaProperties.getTransactionManagerId());
-//        }
-
-//        properties.setProperty("com.atomikos.icatch.log_base_dir", getLogBaseDir(jtaProperties));
-//        properties.putAll(atomikosProperties.asProperties());
-
-//        return new UserTransactionServiceImp(properties);
-        return new UserTransactionServiceImp();
-    }
-
-    private String getLogBaseDir(JtaProperties jtaProperties) {
-        if (StringUtils.hasLength(jtaProperties.getLogDir())) {
-            return jtaProperties.getLogDir();
+        // TODO: What is the differences between JdbcTransactionManager and DataSourceTransactionManager?
+        @Bean(TRANSACTION_MANAGER_BEAN_NAME)
+        TransactionManager transactionManager() {
+            return new JdbcTransactionManager(dataSource());
         }
-        File home = new ApplicationHome().getDir();
-        return new File(home, "transaction-logs").getAbsolutePath();
-    }
-
-    @Bean(initMethod = "init", destroyMethod = "close")
-//    @ConditionalOnMissingBean(javax.transaction.TransactionManager.class)
-    UserTransactionManager atomikosTransactionManager(UserTransactionService userTransactionService) {
-        UserTransactionManager manager = new UserTransactionManager();
-        manager.setStartupTransactionService(false);
-        manager.setForceShutdown(true);
-
-        return manager;
-    }
-
-    @Bean(TRANSACTION_MANAGER_BEAN_NAME)
-    JtaTransactionManager transactionManager(
-            UserTransaction userTransaction, UserTransactionService userTransactionService,
-            ObjectProvider<TransactionManagerCustomizers> transactionManagerCustomizers) {
-        JtaTransactionManager jtaTransactionManager = new JtaTransactionManager(userTransaction, atomikosTransactionManager(userTransactionService));
-        transactionManagerCustomizers.ifAvailable((customizers) -> customizers.customize(jtaTransactionManager));
-        return jtaTransactionManager;
     }
 
 }

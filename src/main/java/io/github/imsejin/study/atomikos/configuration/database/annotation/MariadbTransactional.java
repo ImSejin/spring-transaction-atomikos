@@ -1,6 +1,6 @@
 package io.github.imsejin.study.atomikos.configuration.database.annotation;
 
-import io.github.imsejin.study.atomikos.configuration.database.MariadbDataSourceConfiguration;
+import io.github.imsejin.study.atomikos.configuration.database.jta.XaDataSourceConfiguration;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Propagation;
@@ -17,7 +17,7 @@ import java.lang.annotation.Target;
 @Documented
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.TYPE, ElementType.METHOD})
-@Transactional(transactionManager = MariadbDataSourceConfiguration.TRANSACTION_MANAGER_BEAN_NAME)
+@Transactional(transactionManager = XaDataSourceConfiguration.MariaDB.TRANSACTION_MANAGER_BEAN_NAME)
 public @interface MariadbTransactional {
 
     /**
